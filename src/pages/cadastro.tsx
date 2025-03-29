@@ -1,6 +1,8 @@
-import { CadastroView } from 'src/sections/cadastro/view/cadastro-view';
 import { Helmet } from 'react-helmet-async';
+
 import { CONFIG } from 'src/config-global';
+
+import { CadastroView } from 'src/sections/cadastro/view/cadastro-view';
 
 function CadastroPage() {
   return (

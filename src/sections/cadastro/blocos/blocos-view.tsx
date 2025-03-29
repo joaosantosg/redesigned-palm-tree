@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { GenericListView } from '../components/generic-list-view';
+
 import { BlocoCreateModal } from './bloco-create-modal';
+import { GenericListView } from '../components/generic-list-view';
 
 const COLUMNS = [
   { id: 'nome', label: 'Nome', minWidth: 170 },

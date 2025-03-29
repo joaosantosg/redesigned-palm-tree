@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
-import { GenericListView } from '../components/generic-list-view';
 import { CursoCreateModal } from './curso-create-modal';
+import { GenericListView } from '../components/generic-list-view';
 
 const COLUMNS = [
   { id: 'nome', label: 'Nome' },

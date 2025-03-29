@@ -3,6 +3,9 @@ import { Suspense, StrictMode } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+
 import App from './app';
 
 // ----------------------------------------------------------------------
@@ -13,9 +16,11 @@ root.render(
   <StrictMode>
     <HelmetProvider>
       <BrowserRouter>
-        <Suspense>
-          <App />
-        </Suspense>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
+          <Suspense>
+            <App />
+          </Suspense>
+        </LocalizationProvider>
       </BrowserRouter>
     </HelmetProvider>
   </StrictMode>

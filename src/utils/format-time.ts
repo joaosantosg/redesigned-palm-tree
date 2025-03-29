@@ -1,6 +1,7 @@
 import type { Dayjs } from 'dayjs';
 
 import dayjs from 'dayjs';
+import 'dayjs/locale/pt-br';
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -8,6 +9,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
+dayjs.locale('pt-br');
 
 // ----------------------------------------------------------------------
 
@@ -17,15 +19,15 @@ export type DatePickerFormat = Dayjs | Date | string | number | null | undefined
  * Docs: https://day.js.org/docs/en/display/format
  */
 export const formatStr = {
-  dateTime: 'DD MMM YYYY h:mm a', // 17 Apr 2022 12:00 am
-  date: 'DD MMM YYYY', // 17 Apr 2022
-  time: 'h:mm a', // 12:00 am
+  dateTime: 'DD/MM/YYYY HH:mm', // 17/04/2022 14:30
+  date: 'DD/MM/YYYY', // 17/04/2022
+  time: 'HH:mm', // 14:30
   split: {
-    dateTime: 'DD/MM/YYYY h:mm a', // 17/04/2022 12:00 am
+    dateTime: 'DD/MM/YYYY HH:mm', // 17/04/2022 14:30
     date: 'DD/MM/YYYY', // 17/04/2022
   },
   paramCase: {
-    dateTime: 'DD-MM-YYYY h:mm a', // 17-04-2022 12:00 am
+    dateTime: 'DD-MM-YYYY HH:mm', // 17-04-2022 14:30
     date: 'DD-MM-YYYY', // 17-04-2022
   },
 };
@@ -36,7 +38,7 @@ export function today(format?: string) {
 
 // ----------------------------------------------------------------------
 
-/** output: 17 Apr 2022 12:00 am
+/** output: 17/04/2022 14:30
  */
 export function fDateTime(date: DatePickerFormat, format?: string) {
   if (!date) {
@@ -45,12 +47,12 @@ export function fDateTime(date: DatePickerFormat, format?: string) {
 
   const isValid = dayjs(date).isValid();
 
-  return isValid ? dayjs(date).format(format ?? formatStr.dateTime) : 'Invalid time value';
+  return isValid ? dayjs(date).format(format ?? formatStr.dateTime) : 'Data inválida';
 }
 
 // ----------------------------------------------------------------------
 
-/** output: 17 Apr 2022
+/** output: 17/04/2022
  */
 export function fDate(date: DatePickerFormat, format?: string) {
   if (!date) {
@@ -59,12 +61,12 @@ export function fDate(date: DatePickerFormat, format?: string) {
 
   const isValid = dayjs(date).isValid();
 
-  return isValid ? dayjs(date).format(format ?? formatStr.date) : 'Invalid time value';
+  return isValid ? dayjs(date).format(format ?? formatStr.date) : 'Data inválida';
 }
 
 // ----------------------------------------------------------------------
 
-/** output: 12:00 am
+/** output: 14:30
  */
 export function fTime(date: DatePickerFormat, format?: string) {
   if (!date) {
@@ -73,7 +75,7 @@ export function fTime(date: DatePickerFormat, format?: string) {
 
   const isValid = dayjs(date).isValid();
 
-  return isValid ? dayjs(date).format(format ?? formatStr.time) : 'Invalid time value';
+  return isValid ? dayjs(date).format(format ?? formatStr.time) : 'Hora inválida';
 }
 
 // ----------------------------------------------------------------------
@@ -87,12 +89,12 @@ export function fTimestamp(date: DatePickerFormat) {
 
   const isValid = dayjs(date).isValid();
 
-  return isValid ? dayjs(date).valueOf() : 'Invalid time value';
+  return isValid ? dayjs(date).valueOf() : 'Data inválida';
 }
 
 // ----------------------------------------------------------------------
 
-/** output: a few seconds, 2 years
+/** output: há alguns segundos, há 2 anos
  */
 export function fToNow(date: DatePickerFormat) {
   if (!date) {
@@ -101,5 +103,5 @@ export function fToNow(date: DatePickerFormat) {
 
   const isValid = dayjs(date).isValid();
 
-  return isValid ? dayjs(date).toNow(true) : 'Invalid time value';
+  return isValid ? dayjs(date).toNow(true) : 'Data inválida';
 }

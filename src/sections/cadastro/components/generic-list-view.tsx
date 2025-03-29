@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -13,7 +11,9 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+
 import { DashboardContent } from 'src/layouts/dashboard';
+
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
@@ -27,6 +27,7 @@ interface Column {
 interface GenericListViewProps {
   title: string;
   columns: Column[];
+  customRowComponent?: React.ComponentType<{ row: any }>;
   data: any[];
   CreateModal: React.ComponentType<{ open: boolean; onClose: () => void; onSuccess: () => void }>;
   handleDelete?: (id: string) => Promise<void>;
@@ -36,6 +37,7 @@ interface GenericListViewProps {
 export function GenericListView({
   title,
   columns,
+  customRowComponent: CustomRow,
   data,
   CreateModal,
   handleDelete,
@@ -77,26 +79,32 @@ export function GenericListView({
               </TableHead>
 
               <TableBody>
-                {data.map((row) => (
-                  <TableRow key={row.id} hover>
-                    {columns.map((column) => (
-                      <TableCell key={column.id} align={column.align}>
-                        {row[column.id]}
-                      </TableCell>
-                    ))}
-                    {handleDelete && (
-                      <TableCell align="right">
-                        <Button
-                          color="error"
-                          onClick={() => handleDelete(row.id)}
-                          startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-                        >
-                          Excluir
-                        </Button>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
+                {data.map((row) => {
+                  if (CustomRow) {
+                    return <CustomRow key={row.id} row={row} />;
+                  }
+
+                  return (
+                    <TableRow key={row.id} hover>
+                      {columns.map((column) => (
+                        <TableCell key={column.id} align={column.align}>
+                          {row[column.id]}
+                        </TableCell>
+                      ))}
+                      {handleDelete && (
+                        <TableCell align="right">
+                          <Button
+                            color="error"
+                            onClick={() => handleDelete(row.id)}
+                            startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+                          >
+                            Excluir
+                          </Button>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
 
                 {!loading && !data.length && (
                   <TableRow>
