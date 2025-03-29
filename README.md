@@ -46,3 +46,6 @@ Distributed under the [MIT](https://github.com/minimal-ui-kit/minimal.free/blob/
 ## Contact us
 
 Email: support@minimals.cc
+
+
+Paleta de cores https://issuu.com/unievangelica/docs/thiago_cayo_mau_clara_rafaella_e_lara

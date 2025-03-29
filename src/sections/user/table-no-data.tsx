@@ -1,31 +1,21 @@
-import type { TableRowProps } from '@mui/material/TableRow';
-
-import Box from '@mui/material/Box';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 
-// ----------------------------------------------------------------------
+import { Iconify } from 'src/components/iconify';
 
-type TableNoDataProps = TableRowProps & {
-  searchQuery: string;
-};
+interface TableNoDataProps {
+  searchQuery?: string;
+}
 
-export function TableNoData({ searchQuery, ...other }: TableNoDataProps) {
+export function TableNoData({ searchQuery }: TableNoDataProps) {
   return (
-    <TableRow {...other}>
-      <TableCell align="center" colSpan={7}>
-        <Box sx={{ py: 15, textAlign: 'center' }}>
-          <Typography variant="h6" sx={{ mb: 1 }}>
-            Not found
-          </Typography>
-
-          <Typography variant="body2">
-            No results found for &nbsp;
-            <strong>&quot;{searchQuery}&quot;</strong>.
-            <br /> Try checking for typos or using complete words.
-          </Typography>
-        </Box>
+    <TableRow>
+      <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+          {searchQuery ? 'Nenhum usuário encontrado' : 'Nenhum usuário cadastrado'}
+        </Typography>
+        <Iconify icon="mingcute:user-off-line" width={72} sx={{ color: 'text.disabled' }} />
       </TableCell>
     </TableRow>
   );
