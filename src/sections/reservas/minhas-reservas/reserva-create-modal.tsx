@@ -1,5 +1,5 @@
 import type { ISala } from 'src/api/services/salas/sala.types';
-import type { 
+import { 
   IReservaCreate, 
   FrequenciaRecorrencia,
   TipoReservaRecorrente,
@@ -41,13 +41,16 @@ const schema = z.object({
   hora_fim: z.string().min(1, 'Selecione o horário de fim'),
   motivo: z.string().min(1, 'O motivo é obrigatório'),
   // Campos para reserva recorrente
+  tipo_recorrencia: z.enum(['REGULAR', 'SEMESTRE']).optional(),
+  // Campos para recorrência regular
   frequencia: z.enum(['DIARIO', 'SEMANAL', 'MENSAL']).optional(),
   dia_da_semana: z.array(z.string()).optional(),
   dia_do_mes: z.string().optional(),
   data_fim: z.date().optional(),
-  tipo_recorrencia: z.enum(['REGULAR', 'SEMESTRE']).optional(),
+  // Campo para recorrência semestral
   semestre: z.string().regex(/^\d{4}\.[12]$/, 'Formato inválido. Use YYYY.S (ex: 2024.1)').optional(),
 }).refine((data) => {
+  // Validação para reserva regular
   if (data.tipo === 'REGULAR') {
     const inicio = dayjs(`${dayjs(data.data).format('YYYY-MM-DD')}T${data.hora_inicio}`);
     const fim = dayjs(`${dayjs(data.data).format('YYYY-MM-DD')}T${data.hora_fim}`);
@@ -58,16 +61,27 @@ const schema = z.object({
   message: 'O horário de fim deve ser posterior ao horário de início',
   path: ['hora_fim'],
 }).refine((data) => {
+  // Validação para reserva recorrente regular
   if (data.tipo === 'RECORRENTE' && data.tipo_recorrencia === 'REGULAR') {
     if (!data.frequencia) return false;
     if (data.frequencia === 'SEMANAL' && (!data.dia_da_semana || data.dia_da_semana.length === 0)) return false;
     if (data.frequencia === 'MENSAL' && !data.dia_do_mes) return false;
-    if (data.data_fim && dayjs(data.data_fim).isBefore(dayjs(data.data))) return false;
+    if (!data.data_fim) return false;
+    return dayjs(data.data_fim).isAfter(dayjs(data.data));
   }
   return true;
 }, {
-  message: 'Preencha todos os campos necessários para a frequência selecionada',
+  message: 'Preencha todos os campos necessários para a recorrência regular',
   path: ['frequencia'],
+}).refine((data) => {
+  // Validação para reserva recorrente semestral
+  if (data.tipo === 'RECORRENTE' && data.tipo_recorrencia === 'SEMESTRE') {
+    return !!data.semestre;
+  }
+  return true;
+}, {
+  message: 'Informe o semestre',
+  path: ['semestre'],
 });
 
 type FormValuesProps = z.infer<typeof schema>;
@@ -131,10 +145,6 @@ export default function ReservaCreateModal({ open, onClose, onSuccess }: Props) 
     formState: { errors },
   } = methods;
 
-  const tipo = watch('tipo');
-  const frequencia = watch('frequencia');
-  const tipoRecorrencia = watch('tipo_recorrencia');
-
   const onSubmit = handleSubmit(async (data) => {
     try {
       setLoading(true);
@@ -148,8 +158,8 @@ export default function ReservaCreateModal({ open, onClose, onSuccess }: Props) 
         };
 
         await ReservaService.criarReserva(reserva);
-      } else {
-        const reservaRecorrente: IReservaRecorrenteRegularCreate | IReservaRecorrenteSemestreCreate = {
+      } else if (data.tipo_recorrencia === 'REGULAR') {
+        const reserva: IReservaRecorrenteRegularCreate = {
           sala_id: data.sala_id,
           motivo: data.motivo,
           frequencia: data.frequencia as FrequenciaRecorrencia,
@@ -158,22 +168,28 @@ export default function ReservaCreateModal({ open, onClose, onSuccess }: Props) 
           hora_inicio: data.hora_inicio,
           hora_fim: data.hora_fim,
           data_inicio: dayjs(data.data).format('YYYY-MM-DD'),
-          data_fim: data.data_fim ? dayjs(data.data_fim).format('YYYY-MM-DD') : undefined,
-          tipo: data.tipo_recorrencia as TipoReservaRecorrente,
-          semestre: data.semestre || '',
+          data_fim: dayjs(data.data_fim).format('YYYY-MM-DD'),
+          tipo: TipoReservaRecorrente.REGULAR ,
         };
 
-        if (data.tipo_recorrencia === 'SEMESTRE') {
-          await ReservaService.criarReservaRecorrenteSemestre(reservaRecorrente as IReservaRecorrenteSemestreCreate);
-        } else {
-          await ReservaService.criarReservaRecorrenteRegular(reservaRecorrente as IReservaRecorrenteRegularCreate);
-        }
+        await ReservaService.criarReservaRecorrenteRegular(reserva);
+      } else {
+        const reserva: IReservaRecorrenteSemestreCreate = {
+          sala_id: data.sala_id,
+          motivo: data.motivo,
+          hora_inicio: data.hora_inicio,
+          hora_fim: data.hora_fim,
+          tipo: TipoReservaRecorrente.SEMESTRE,
+          semestre: data.semestre!,
+          frequencia: data.frequencia as FrequenciaRecorrencia,
+        };
+
+        await ReservaService.criarReservaRecorrenteSemestre(reserva);
       }
 
       reset();
       onClose();
       onSuccess();
-
       enqueueSnackbar('Reserva criada com sucesso!');
     } catch (error) {
       console.error(error);
