@@ -1,4 +1,4 @@
-import type { IUsuario } from 'src/api/services/usuario/types';
+import type { IUsuario } from 'src/api/services/usuario/usuario.types';
 
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState, useEffect, useContext, useCallback, createContext } from 'react';

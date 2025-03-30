@@ -1,7 +1,7 @@
 import type { IBloco } from 'src/api/services/blocos/bloco.types';
-import type { ISalaCreate } from 'src/api/services/salas/sala.types';
+import type { ISala, ISalaUpdate } from 'src/api/services/salas/sala.types';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
@@ -54,60 +54,54 @@ const CURSOS = [
   'Engenharia de Controle e Automação',
 ];
 
-interface SalaCreateModalProps {
+interface SalaDetailsModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  salaId: string;
 }
 
-export function SalaCreateModal({ open, onClose, onSuccess }: SalaCreateModalProps) {
+export function SalaDetailsModal({ open, onClose, onSuccess, salaId }: SalaDetailsModalProps) {
   const loading = useBoolean();
   const [error, setError] = useState<string | null>(null);
   const [blocos, setBlocos] = useState<IBloco[]>([]);
+  const [sala, setSala] = useState<ISala | null>(null);
   const [recursosSelecionados, setRecursosSelecionados] = useState<string[]>([]);
 
-  const [formData, setFormData] = useState<ISalaCreate>({
-    bloco_id: '',
+  const [formData, setFormData] = useState<ISalaUpdate>({
     identificacao_sala: '',
     capacidade_maxima: 0,
     recursos: [],
     uso_restrito: false,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-    setError(null);
-  };
-
-  const handleRecursoToggle = (recurso: string) => {
-    const novosRecursos = recursosSelecionados.includes(recurso)
-      ? recursosSelecionados.filter((r) => r !== recurso)
-      : [...recursosSelecionados, recurso];
-    
-    setRecursosSelecionados(novosRecursos);
-    setFormData((prev) => ({
-      ...prev,
-      recursos: novosRecursos,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const fetchSala = useCallback(async () => {
     try {
       loading.onTrue();
-      await SalaService.criarSala(formData);
-      onSuccess();
-      onClose();
-    } catch (err: any) {
-      setError(err.response?.data?.mensagem || 'Erro ao criar sala');
+      const response = await SalaService.obterSala(salaId);
+      setSala(response.dados);
+      setFormData({
+        identificacao_sala: response.dados.identificacao_sala,
+        capacidade_maxima: response.dados.capacidade_maxima,
+        recursos: response.dados.recursos,
+        uso_restrito: response.dados.uso_restrito,
+        curso_restrito: response.dados.curso_restrito,
+      });
+      setRecursosSelecionados(response.dados.recursos);
+    } catch (err) {
+      console.error('Erro ao buscar sala:', err);
+      setError('Erro ao carregar dados da sala');
     } finally {
       loading.onFalse();
     }
-  };
+  }, [salaId, loading]);
+
+  useEffect(() => {
+    if (open) {
+      fetchSala();
+      fetchBlocos();
+    }
+  }, [open, salaId, fetchSala]);
 
   const fetchBlocos = async () => {
     try {
@@ -122,33 +116,64 @@ export function SalaCreateModal({ open, onClose, onSuccess }: SalaCreateModalPro
     }
   };
 
-  useEffect(() => {
-    fetchBlocos();
-  }, []);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((formPrev) => ({
+      ...formPrev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+    setError(null);
+  };
+
+  const handleRecursoToggle = (recurso: string) => {
+    setRecursosSelecionados((prev) => {
+      const novosRecursos = prev.includes(recurso)
+        ? prev.filter((r) => r !== recurso)
+        : [...prev, recurso];
+      
+      setFormData((formPrev) => ({
+        ...formPrev,
+        recursos: novosRecursos,
+      }));
+      
+      return novosRecursos;
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      loading.onTrue();
+      await SalaService.atualizarSala(salaId, formData);
+      onSuccess();
+      onClose();
+    } catch (err: any) {
+      setError(err.response?.data?.mensagem || 'Erro ao atualizar sala');
+    } finally {
+      loading.onFalse();
+    }
+  };
+
+  if (!sala) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Nova Sala</DialogTitle>
+      <DialogTitle>Detalhes da Sala</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent sx={{ pb: 0, mt: 1 }}>
           <Autocomplete
             fullWidth
             options={blocos}
             getOptionLabel={(option) => option.nome}
-            value={blocos.find((bloco) => bloco.id === formData.bloco_id) || null}
-            onChange={(_, newValue) => {
-              setFormData((prev) => ({
-                ...prev,
-                bloco_id: newValue?.id || '',
-              }));
-            }}
+            value={blocos.find((bloco) => bloco.id === sala.bloco_id) || null}
+            disabled
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Bloco"
                 margin="dense"
-                required
-                error={!formData.bloco_id}
               />
             )}
           />
@@ -238,7 +263,7 @@ export function SalaCreateModal({ open, onClose, onSuccess }: SalaCreateModalPro
             Cancelar
           </Button>
           <LoadingButton type="submit" variant="contained" loading={loading.value}>
-            Criar
+            Salvar Alterações
           </LoadingButton>
         </DialogActions>
       </form>

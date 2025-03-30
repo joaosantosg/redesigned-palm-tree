@@ -33,14 +33,7 @@ const CADASTROS = [
     path: '/semestres',
     description: 'Configure os períodos letivos',
     color: 'warning.main',
-  },
-  {
-    title: 'Cursos',
-    icon: 'mdi:school',
-    path: '/cursos',
-    description: 'Gerencie os cursos disponíveis',
-    color: 'error.main',
-  },
+  }
 ];
 
 export function CadastroView() {

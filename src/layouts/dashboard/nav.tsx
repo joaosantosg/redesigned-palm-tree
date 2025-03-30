@@ -16,19 +16,20 @@ import { varAlpha } from 'src/theme/styles';
 import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
 
-import { NavUpgrade } from '../components/nav-upgrade';
-
 import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
 
 // ----------------------------------------------------------------------
 
+type NavItem = {
+  path: string;
+  title: string;
+  icon: React.ReactNode;
+  info?: React.ReactNode;
+  children?: Omit<NavItem, 'children'>[];
+};
+
 export type NavContentProps = {
-  data: {
-    path: string;
-    title: string;
-    icon: React.ReactNode;
-    info?: React.ReactNode;
-  }[];
+  data: NavItem[];
   slots?: {
     topArea?: React.ReactNode;
     bottomArea?: React.ReactNode;
@@ -122,50 +123,97 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
 
       {slots?.topArea}
 
-
       <Scrollbar fillContent>
         <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>
           <Box component="ul" gap={0.5} display="flex" flexDirection="column">
             {data.map((item) => {
               const isActived = item.path === pathname;
+              const hasChildren = item.children && item.children.length > 0;
 
               return (
-                <ListItem disableGutters disablePadding key={item.title}>
-                  <ListItemButton
-                    disableGutters
-                    component={RouterLink}
-                    href={item.path}
-                    sx={{
-                      pl: 2,
-                      py: 1,
-                      gap: 2,
-                      pr: 1.5,
-                      borderRadius: 0.75,
-                      typography: 'body2',
-                      fontWeight: 'fontWeightMedium',
-                      color: 'var(--layout-nav-item-color)',
-                      minHeight: 'var(--layout-nav-item-height)',
-                      ...(isActived && {
-                        fontWeight: 'fontWeightSemiBold',
-                        bgcolor: 'var(--layout-nav-item-active-bg)',
-                        color: 'var(--layout-nav-item-active-color)',
-                        '&:hover': {
-                          bgcolor: 'var(--layout-nav-item-hover-bg)',
-                        },
-                      }),
-                    }}
-                  >
-                    <Box component="span" sx={{ width: 24, height: 24 }}>
-                      {item.icon}
-                    </Box>
+                <Box key={item.title}>
+                  <ListItem disableGutters disablePadding>
+                    <ListItemButton
+                      disableGutters
+                      component={RouterLink}
+                      href={item.path}
+                      sx={{
+                        pl: 2,
+                        py: 1,
+                        gap: 2,
+                        pr: 1.5,
+                        borderRadius: 0.75,
+                        typography: 'body2',
+                        fontWeight: 'fontWeightMedium',
+                        color: 'var(--layout-nav-item-color)',
+                        minHeight: 'var(--layout-nav-item-height)',
+                        ...(isActived && {
+                          fontWeight: 'fontWeightSemiBold',
+                          bgcolor: 'var(--layout-nav-item-active-bg)',
+                          color: 'var(--layout-nav-item-active-color)',
+                          '&:hover': {
+                            bgcolor: 'var(--layout-nav-item-hover-bg)',
+                          },
+                        }),
+                      }}
+                    >
+                      <Box component="span" sx={{ width: 24, height: 24 }}>
+                        {item.icon}
+                      </Box>
 
-                    <Box component="span" flexGrow={1}>
-                      {item.title}
-                    </Box>
+                      <Box component="span" flexGrow={1}>
+                        {item.title}
+                      </Box>
 
-                    {item.info && item.info}
-                  </ListItemButton>
-                </ListItem>
+                      {item.info && item.info}
+                    </ListItemButton>
+                  </ListItem>
+
+                  {hasChildren && (
+                    <Box pl={4}>
+                      {item.children?.map((child) => {
+                        const isChildActived = child.path === pathname;
+
+                        return (
+                          <ListItem disableGutters disablePadding key={child.title}>
+                            <ListItemButton
+                              disableGutters
+                              component={RouterLink}
+                              href={child.path}
+                              sx={{
+                                pl: 2,
+                                py: 1,
+                                gap: 2,
+                                pr: 1.5,
+                                borderRadius: 0.75,
+                                typography: 'body2',
+                                fontWeight: 'fontWeightMedium',
+                                color: 'var(--layout-nav-item-color)',
+                                minHeight: 'var(--layout-nav-item-height)',
+                                ...(isChildActived && {
+                                  fontWeight: 'fontWeightSemiBold',
+                                  bgcolor: 'var(--layout-nav-item-active-bg)',
+                                  color: 'var(--layout-nav-item-active-color)',
+                                  '&:hover': {
+                                    bgcolor: 'var(--layout-nav-item-hover-bg)',
+                                  },
+                                }),
+                              }}
+                            >
+                              <Box component="span" sx={{ width: 24, height: 24 }}>
+                                {child.icon}
+                              </Box>
+
+                              <Box component="span" flexGrow={1}>
+                                {child.title}
+                              </Box>
+                            </ListItemButton>
+                          </ListItem>
+                        );
+                      })}
+                    </Box>
+                  )}
+                </Box>
               );
             })}
           </Box>
@@ -173,8 +221,6 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
       </Scrollbar>
 
       {slots?.bottomArea}
-
-      <NavUpgrade />
     </>
   );
 }

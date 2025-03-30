@@ -1,3 +1,5 @@
+import type { RespostaDados, RespostaLista } from 'src/api/types';
+
 export interface ISemestre {
   id: string;
   identificador: string;
@@ -13,12 +15,5 @@ export interface ISemestreCreate {
   ativo?: boolean;
 }
 
-export interface IRespostaDados<T> {
-  dados: T;
-  mensagem: string;
-}
-
-export interface IRespostaLista<T> {
-  dados: T[];
-  mensagem: string;
-}
+export type SemestreResponse = RespostaDados<ISemestre>;
+export type SemestreListResponse = RespostaLista<ISemestre>;

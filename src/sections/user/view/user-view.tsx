@@ -1,4 +1,4 @@
-import type { IUsuario } from 'src/api/services/usuario/types';
+import type { IUsuario } from 'src/api/services/usuario/usuario.types';
 
 import { useState, useEffect, useCallback } from 'react';
 
@@ -47,7 +47,7 @@ export function UsuariosView() {
       const response = await UsuarioService.listarUsuarios({
         nome: filterName || undefined,
         pagina: page + 1,
-        itens_por_pagina: rowsPerPage,
+        tamanho: rowsPerPage,
       });
       
       if (response.dados && response.paginacao) {

@@ -1,52 +1,92 @@
-import { useState, useEffect } from 'react';
+import type { ISala } from 'src/api/services/salas/sala.types';
 
+import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+
+import { SalaService } from 'src/api/services/salas/sala.service';
+
+import { SalaCustomRow } from './sala-custom-row';
 import { SalaCreateModal } from './sala-create-modal';
-import { GenericListView } from '../components/generic-list-view';
+import { GenericListViewPaginated } from '../components/generic-list-view-paginated';
 
 const COLUMNS = [
-  { id: 'nome', label: 'Nome' },
-  { id: 'tipo', label: 'Tipo' },
-  { id: 'capacidade', label: 'Capacidade' },
-  { id: 'bloco', label: 'Bloco' },
+  { id: 'identificacao_sala', label: 'Identificação', minWidth: 170 },
+  { id: 'capacidade_maxima', label: 'Capacidade', minWidth: 100 },
+  { id: 'uso_restrito', label: 'Uso Restrito', minWidth: 120 },
+  { id: 'curso_restrito', label: 'Curso Restrito', minWidth: 170 },
 ];
 
 export function SalasView() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+
+
+  const customRowComponent = ({ row }: { row: ISala }) => (
+    <SalaCustomRow row={row} onDetails={handleDetails} onDelete={handleDelete} />
+  );
+
+  const navigate = useNavigate();
+  const [data, setData] = useState<ISala[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalItems, setTotalItems] = useState(0);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await SalaService.listarSalas({
+        pagina: page + 1,
+        tamanho: rowsPerPage,
+      });
+      setData(response.dados);
+      setTotalItems(response.paginacao.total);
+    } catch (error) {
+      console.error('Erro ao buscar salas:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, rowsPerPage]);
 
   useEffect(() => {
-    // Aqui você irá integrar com a API
-    // const fetchData = async () => {
-    //   try {
-    //     setLoading(true);
-    //     const response = await SalaService.listar();
-    //     setData(response.data);
-    //   } catch (error) {
-    //     console.error('Erro ao buscar salas:', error);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-    // fetchData();
-  }, []);
+    fetchData();
+  }, [fetchData]);
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const handleDelete = async (id: string) => {
     try {
-      // await SalaService.deletar(id);
-      setData((prevData) => prevData.filter((item: any) => item.id !== id));
+      await SalaService.removerSala(id);
+      fetchData();
     } catch (error) {
-      console.error('Erro ao deletar sala:', error);
+      console.error('Erro ao remover sala:', error);
     }
   };
 
+  const handleDetails = (id: string) => {
+    navigate(`/cadastros/salas/${id}`.toLowerCase());
+  };
+
   return (
-    <GenericListView
+    <GenericListViewPaginated
       title="Salas"
       columns={COLUMNS}
       data={data}
       loading={loading}
-      createModal={SalaCreateModal}
-      onDelete={handleDelete}
+      CreateModal={SalaCreateModal}
+      handleDelete={handleDelete}
+      handleDetails={handleDetails}
+      totalItems={totalItems}
+      customRowComponent={customRowComponent}
+      page={page}
+      rowsPerPage={rowsPerPage}
+      onPageChange={handleChangePage}
+      onRowsPerPageChange={handleChangeRowsPerPage}
     />
   );
 } 

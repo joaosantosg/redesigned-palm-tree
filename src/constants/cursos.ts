@@ -13,4 +13,6 @@ export const CURSOS = [
   'Sistemas de Informação',
 ] as const;
 
+
+
 export type Curso = typeof CURSOS[number]; 

@@ -1,4 +1,4 @@
-import type { IUsuario } from '../usuario/types';
+import type { IUsuario } from '../usuario/usuario.types';
 
 
 export interface LoginRequest {

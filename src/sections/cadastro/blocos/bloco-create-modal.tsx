@@ -1,3 +1,5 @@
+import type { IBlocoCreate } from 'src/api/services/blocos/bloco.types';
+
 import { useState } from 'react';
 
 import { LoadingButton } from '@mui/lab';
@@ -10,6 +12,8 @@ import DialogContent from '@mui/material/DialogContent';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
+import { BlocoService } from 'src/api/services/blocos/bloco.service';
+
 interface BlocoCreateModalProps {
   open: boolean;
   onClose: () => void;
@@ -20,9 +24,9 @@ export function BlocoCreateModal({ open, onClose, onSuccess }: BlocoCreateModalP
   const loading = useBoolean();
   const [error, setError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<IBlocoCreate>({
     nome: '',
-    descricao: '',
+    identificacao: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,12 +39,11 @@ export function BlocoCreateModal({ open, onClose, onSuccess }: BlocoCreateModalP
     e.preventDefault();
     try {
       loading.onTrue();
-      // Aqui você irá integrar com a API
-      // await BlocoService.criar(formData);
+      await BlocoService.criarBloco(formData);
       onSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Erro ao criar bloco');
+      setError(err.response?.data?.mensagem || 'Erro ao criar bloco');
     } finally {
       loading.onFalse();
     }
@@ -63,13 +66,15 @@ export function BlocoCreateModal({ open, onClose, onSuccess }: BlocoCreateModalP
 
           <TextField
             fullWidth
-            label="Descrição"
-            name="descricao"
-            value={formData.descricao}
+            label="Identificação"
+            name="identificacao"
+            inputProps={{
+              maxLength: 20,
+            }}
+            value={formData.identificacao}
             onChange={handleChange}
             margin="dense"
-            multiline
-            rows={3}
+            required
           />
 
           {error && (

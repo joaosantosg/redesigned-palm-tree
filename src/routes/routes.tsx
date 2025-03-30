@@ -13,10 +13,8 @@ import { ProtectedRoute } from 'src/components/auth/protected-route';
 // ----------------------------------------------------------------------
 
 export const HomePage = lazy(() => import('src/pages/home'));
-export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UsuariosPage = lazy(() => import('src/pages/usuarios'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
-export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export const PermissionDeniedPage = lazy(() => import('src/pages/permission-denied'));
 export const CadastroPage = lazy(() => import('src/pages/cadastro'));
@@ -24,8 +22,12 @@ export const CadastroPage = lazy(() => import('src/pages/cadastro'));
 // Páginas de Cadastro
 export const BlocosPage = lazy(() => import('src/pages/cadastros/blocos'));
 export const SalasPage = lazy(() => import('src/pages/cadastros/salas'));
+export const SalaDetailsPage = lazy(() => import('src/pages/cadastros/salas/sala-detail'));
 export const SemestresPage = lazy(() => import('src/pages/cadastros/semestres'));
-export const CursosPage = lazy(() => import('src/pages/cadastros/cursos'));
+
+// Páginas de Reservas
+export const MinhasReservasPage = lazy(() => import('src/pages/reservas/minhas-reservas'));
+export const MinhasReservasRecorrentesPage = lazy(() => import('src/pages/reservas/minhas-reservas-recorrentes'));
 
 // ----------------------------------------------------------------------
 
@@ -57,8 +59,8 @@ export function Router() {
       children: [
         { element: <HomePage />, index: true },
         { path: 'usuarios', element: <UsuariosPage /> },
-        { path: 'products', element: <ProductsPage /> },
-        { path: 'blog', element: <BlogPage /> },
+        { path: 'reservas', element: <MinhasReservasPage /> },
+        { path: 'reservas/recorrentes', element: <MinhasReservasRecorrentesPage /> },
       ],
     },
     {
@@ -75,9 +77,8 @@ export function Router() {
         { path: 'cadastros-de-parametros', element: <CadastroPage /> },
         { path: 'cadastros/blocos', element: <BlocosPage /> },
         { path: 'cadastros/salas', element: <SalasPage /> },
-        { path: 'cadastros/semestres', element: <SemestresPage /> },
-        { path: 'cadastros/cursos', element: <CursosPage /> },
-        { path: 'configuracoes', element: <ProductsPage /> },
+        { path: 'cadastros/salas/:id', element: <SalaDetailsPage /> },
+        { path: 'cadastros/semestres', element: <SemestresPage /> } 
       ],
     },
     {

@@ -1,4 +1,4 @@
-import type { IUsuarioCreate } from 'src/api/services/usuario/types';
+import type { IUsuarioCreate } from 'src/api/services/usuario/usuario.types';
 
 import { useState } from 'react';
 
@@ -36,7 +36,7 @@ export function UserCreateModal({ open, onClose, onSuccess }: UserCreateModalPro
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: IUsuarioCreate) => ({ ...prev, [name]: value }));
     setError(null);
   };
 

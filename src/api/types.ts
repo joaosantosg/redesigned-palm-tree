@@ -29,3 +29,35 @@ export interface ApiError {
   codigo: number;
   errors?: Record<string, string[]>;
 }
+
+// Tipos comuns para respostas
+export interface RespostaDados<T> {
+  dados: T;
+  mensagem: string;
+}
+
+export interface RespostaLista<T> {
+  dados: T[];
+  mensagem: string;
+}
+
+export interface RespostaPaginada<T> {
+  dados: T[];
+  paginacao: {
+    total: number;
+    pagina: number;
+    tamanho: number;
+    total_paginas: number;
+  };
+  mensagem: string;
+}
+
+// Tipos comuns para filtros
+export interface FiltrosBase {
+  pagina?: number;
+  tamanho?: number;
+}
+
+export interface FiltrosBusca extends FiltrosBase {
+  busca?: string;
+}
