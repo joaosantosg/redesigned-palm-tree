@@ -3,7 +3,7 @@ import type { InternalAxiosRequestConfig } from "axios";
 import axios from "axios";
 
 // 👉 Variável de ambiente com fallback local
-const BASE_URL = 'http://localhost:8000/api';
+const BASE_URL = 'https://reserva-salas.poc.joaosantos.dev.br/api';
 
 // 👉 Criação da instância
 const axiosInstance = axios.create({
